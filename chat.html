@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAGify</title>
+
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23FF3366' d='M208 0c-29.9 0-54.7 20.5-61.8 48.2-.8 0-1.4-.2-2.2-.2-35.3 0-64 28.7-64 64 0 4.8.6 9.5 1.7 14C52.5 138 32 166.6 32 200c0 12.6 3.2 24.3 8.3 34.9C16.3 248.7 0 274.3 0 304c0 33.3 20.4 61.9 49.4 73.9-.9 4.6-1.4 9.3-1.4 14.1 0 39.8 32.2 72 72 72 4.1 0 8.1-.5 12-1.2 9.6 28.5 36.2 49.2 68 49.2 39.8 0 72-32.2 72-72V64c0-35.3-28.7-64-64-64zm368 304c0-29.7-16.3-55.3-40.3-69.1 5.1-10.6 8.3-22.3 8.3-34.9 0-33.4-20.5-62-49.7-74 1.1-4.5 1.7-9.2 1.7-14 0-35.3-28.7-64-64-64-.8 0-1.5.2-2.2.2C422.7 20.5 397.9 0 368 0c-35.3 0-64 28.6-64 64v376c0 39.8 32.2 72 72 72 31.8 0 58.4-20.7 68-49.2 3.9.7 7.9 1.2 12 1.2 39.8 0 72-32.2 72-72 0-4.8-.5-9.5-1.4-14.1 29-12 49.4-40.6 49.4-73.9z'/></svg>">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF3366;
+            --secondary: #4834D4;
+            --dark: #0A0A0A;
+            --gray: #666;
+            --light: #fff;
+            --success: #4CAF50;
+        }
+
+        .logo-link {
+            text-decoration: none;
+            margin-bottom: 1rem;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 80px;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            gap: 2rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 2rem;
+            color: var(--light);
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+            font-size: 1.25rem;
+        }
+
+        .nav-button.active {
+            color: var(--light);
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+        }
+
+        .nav-button:hover:not(.active) {
+            color: var(--light);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .page {
+            position: absolute;
+            inset: 0;
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .upload-container {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .upload-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 4rem;
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            transition: all 0.3s;
+        }
+
+        .upload-box.drag-over {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-button {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: var(--light);
+            border: none;
+            border-radius: 9999px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .upload-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .processing-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .loader {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--gray);
+            border-bottom-color: var(--primary);
+            border-radius: 50%;
+            animation: rotation 1s linear infinite;
+        }
+
+        .success-icon {
+            display: none;
+            color: var(--success);
+            font-size: 40px;
+        }
+
+        .chat-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        .message-wrapper {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+        }
+
+        .message-wrapper.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .avatar.bot {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+        }
+
+        .avatar.user {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 1rem;
+            max-width: 60%;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            background: rgba(255, 255, 255, 0.05);
+            border-top-right-radius: 0;
+        }
+
+        .message.bot {
+            background: rgba(72, 52, 212, 0.1);
+            border-top-left-radius: 0;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--light);
+            font-size: 1rem;
+            padding: 0.5rem;
+            outline: none;
+        }
+
+        .chat-input::placeholder {
+            color: var(--gray);
+        }
+
+        .send-button {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: var(--light);
+            border: none;
+            border-radius: 9999px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .send-button:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-loader {
+            width: 24px;
+            height: 24px;
+            display: none;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <a href="http://127.0.0.1:5500/index.html" class="logo-link">
+            <i class="fas fa-brain logo"></i>
+        </a>
+        <button class="nav-button active" data-page="upload">
+            <i class="fas fa-cloud-upload-alt"></i>
+        </button>
+        <button class="nav-button" data-page="chat">
+            <i class="fas fa-comments"></i>
+        </button>
+    </div>
+
+    <div class="main-content">
+        <div class="page active" id="upload">
+            <div class="upload-container">
+                <div class="upload-box" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h2>Upload Your PDF Files</h2>
+                    <p>Drag and drop your files here or click to browse</p>
+                    <input type="file" id="fileInput" class="file-input" multiple accept=".pdf">
+                    <button class="upload-button" onclick="document.getElementById('fileInput').click()">
+                        Choose Files
+                    </button>
+                    <div class="processing-status">
+                        <div class="loader" id="uploadLoader"></div>
+                        <i class="fas fa-check-circle success-icon" id="uploadSuccess"></i>
+                        <div id="uploadStatus"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="chat">
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" placeholder="Type your message..." id="chatInput">
+                    <div class="loader chat-loader" id="messageLoader"></div>
+                    <button class="send-button" id="sendButton" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://ragdemo-1.onrender.com';
+
+        // Navigation
+        document.querySelectorAll('.nav-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(button.dataset.page).classList.add('active');
+            });
+        });
+
+        // Upload functionality
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadLoader = document.getElementById('uploadLoader');
+        const uploadSuccess = document.getElementById('uploadSuccess');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const sendButton = document.getElementById('sendButton');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add('drag-over');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('drag-over');
+            });
+        });
+
+        dropZone.addEventListener('drop', e => {
+            handleFiles({ target: { files: e.dataTransfer.files } });
+        });
+
+        fileInput.addEventListener('change', handleFiles);
+
+        async function handleFiles(e) {
+            const files = [...e.target.files];
+            if (files.length === 0) return;
+
+            uploadLoader.style.display = 'block';
+            uploadSuccess.style.display = 'none';
+            uploadStatus.textContent = 'Uploading files...';
+
+            const formData = new FormData();
+            files.forEach(file => {
+                if (file.type === 'application/pdf') {
+                    formData.append('files', file);
+                }
+            });
+
+            try {
+                const response = await fetch(`${API_URL}/upload_pdfs`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                uploadStatus.textContent = `Successfully processed ${result.successful_files} of ${result.total_files} files`;
+
+                if (result.successful_files > 0) {
+                    uploadSuccess.style.display = 'block';
+                }
+            } catch (error) {
+                uploadStatus.textContent = 'Error uploading files: ' + error.message;
+            } finally {
+                uploadLoader.style.display = 'none';
+            }
+        }
+
+        // Chat functionality
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const messageLoader = document.getElementById('messageLoader');
+
+        window.addEventListener('load', () => {
+            addMessage("Hello! I'm your RAGify assistant. You can ask me questions about your uploaded documents.", 'bot');
+        });
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, 'user');
+            chatInput.value = '';
+            messageLoader.style.display = 'block';
+            sendButton.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_URL}/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: message,
+                        top_k: 5
+                    })
+                });
+
+                const result = await response.json();
+                addMessage(result.response, 'bot');
+            } catch (error) {
+                addMessage('Sorry, I encountered an error: ' + error.message, 'bot');
+            } finally {
+                messageLoader.style.display = 'none';
+                sendButton.style.display = 'flex';
+            }
+        }
+
+        function addMessage(text, sender) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${sender}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${sender}`;
+            avatar.innerHTML = sender === 'bot' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.textContent = text;
+
+            // Continuing from the previous code...
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(messageDiv);
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+
+</html>

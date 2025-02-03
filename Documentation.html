@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAGify Documentation</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23FF3366' d='M208 0c-29.9 0-54.7 20.5-61.8 48.2-.8 0-1.4-.2-2.2-.2-35.3 0-64 28.7-64 64 0 4.8.6 9.5 1.7 14C52.5 138 32 166.6 32 200c0 12.6 3.2 24.3 8.3 34.9C16.3 248.7 0 274.3 0 304c0 33.3 20.4 61.9 49.4 73.9-.9 4.6-1.4 9.3-1.4 14.1 0 39.8 32.2 72 72 72 4.1 0 8.1-.5 12-1.2 9.6 28.5 36.2 49.2 68 49.2 39.8 0 72-32.2 72-72V64c0-35.3-28.7-64-64-64zm368 304c0-29.7-16.3-55.3-40.3-69.1 5.1-10.6 8.3-22.3 8.3-34.9 0-33.4-20.5-62-49.7-74 1.1-4.5 1.7-9.2 1.7-14 0-35.3-28.7-64-64-64-.8 0-1.5.2-2.2.2C422.7 20.5 397.9 0 368 0c-35.3 0-64 28.6-64 64v376c0 39.8 32.2 72 72 72 31.8 0 58.4-20.7 68-49.2 3.9.7 7.9 1.2 12 1.2 39.8 0 72-32.2 72-72 0-4.8-.5-9.5-1.4-14.1 29-12 49.4-40.6 49.4-73.9z'/></svg>">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF3366;
+            --secondary: #4834D4;
+            --dark: #0A0A0A;
+            --gray: #666;
+            --light: #fff;
+            --code-bg: #1E1E1E;
+            --sidebar-width: 280px;
+            --header-height: 60px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        .docs-container {
+            display: flex;
+            grid-template-columns: var(--sidebar-width) 3fr;
+            min-height: 70vh;
+            position: relative;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            padding: 0 1rem;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Sidebar */
+        .docs-sidebar {
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            height: 100vh;
+            width: var(--sidebar-width);
+            padding: 2rem;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .docs-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .docs-nav-item {
+            color: var(--gray);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .docs-nav-item:hover,
+        .docs-nav-item.active {
+            color: var(--light);
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .docs-nav-item.active {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+        }
+
+        /* Content */
+        .docs-content {
+            margin-left: var(--sidebar-width);
+            padding: 3rem max(2rem, calc((100vw - var(--sidebar-width) - 1000px) / 2));
+            max-width: 2200px;
+        }
+
+        section {
+            margin-bottom: 4rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin: 2rem 0 1rem;
+            line-height: 1.3;
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .copy-button {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--gray);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        /* API Table */
+        .api-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .api-table th,
+        .api-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .mobile-header {
+                display: flex;
+            }
+
+            .docs-container {
+                grid-template-columns: 1fr;
+            }
+
+            .docs-sidebar {
+                transform: translateX(-100%);
+                z-index: 99;
+            }
+
+            .docs-sidebar.active {
+                transform: translateX(0);
+            }
+
+            .docs-content {
+                margin-left: 0;
+                padding-top: calc(var(--header-height) + 2rem);
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="mobile-header">
+        <button class="menu-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h2><i class="fas fa-brain"></i> RAGify</h2>
+    </header>
+
+    <div class="docs-container">
+        <div class="docs-sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-brain"></i> RAGify Docs</h2>
+            </div>
+            <nav class="docs-nav">
+                <a href="#overview" class="docs-nav-item active">
+                    <i class="fas fa-home"></i> Overview
+                </a>
+                <a href="#installation" class="docs-nav-item">
+                    <i class="fas fa-download"></i> Installation
+                </a>
+                <a href="#pinecone" class="docs-nav-item">
+                    <i class="fas fa-database"></i> Pinecone Setup
+                </a>
+                <a href="#openai" class="docs-nav-item">
+                    <i class="fas fa-robot"></i> OpenAI Integration
+                </a>
+                <a href="#api" class="docs-nav-item">
+                    <i class="fas fa-code"></i> API Reference
+                </a>
+                <a href="index.html" class="docs-nav-item" style="margin-top: 450px;">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </nav>
+        </div>
+
+        <main class="docs-content">
+            <!-- Overview Section -->
+            <section id="overview">
+                <h1>RAGify Documentation</h1>
+                <p>RAGify is an AI-powered document analysis framework that combines the capabilities of large language
+                    models with efficient document retrieval. It enables intelligent document processing, semantic
+                    search, and contextual question answering.</p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-bolt"></i>
+                        <h3>Fast Processing</h3>
+                        <p>Process large documents in seconds with optimized chunking and parallel processing
+                            capabilities.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-brain"></i>
+                        <h3>Smart Analysis</h3>
+                        <p>Leverage GPT-4 for deep document understanding and intelligent question answering.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-search"></i>
+                        <h3>Vector Search</h3>
+                        <p>Utilize Pinecone for efficient semantic search across your document collection.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Installation Section -->
+            <section id="installation">
+                <h2>Getting Started</h2>
+                <p>Follow these steps to set up RAGify in your environment:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <h3>Install Dependencies</h3>
+                        <button class="copy-button" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <pre><code class="language-bash">pip install ragify
+pip install openai pinecone-client langchain</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <h3>Environment Setup</h3>
+                        <button class="copy-button" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <pre><code class="language-bash">export OPENAI_API_KEY="your-api-key"
+export PINECONE_API_KEY="your-pinecone-key"
+export PINECONE_ENV="your-environment"</code></pre>
+                </div>
+            </section>
+
+            <!-- Pinecone Section -->
+            <section id="pinecone">
+                <h2>Pinecone Configuration</h2>
+                <p>Configure Pinecone for vector storage and retrieval:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <h3>Initialize Pinecone</h3>
+                        <button class="copy-button" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <pre><code class="language-python">from ragify import PineconeManager
+
+# Initialize Pinecone connection
+pm = PineconeManager(
+    api_key="your-api-key",
+    environment="your-environment"
+)
+
+# Create vector index
+pm.create_index("docs-index", dimension=1536)
+
+# Connect to existing index
+index = pm.connect_index("docs-index")</code></pre>
+                </div>
+            </section>
+
+            <!-- OpenAI Section -->
+            <section id="openai">
+                <h2>OpenAI Integration</h2>
+                <p>Set up document processing with OpenAI embeddings:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <h3>Document Processing</h3>
+                        <button class="copy-button" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <pre><code class="language-python">from ragify import DocumentProcessor
+
+processor = DocumentProcessor()
+
+# Process single document
+doc_embeddings = processor.process_file("document.pdf")
+
+# Process directory
+collection = processor.process_directory("./docs")
+
+# Query documents
+results = collection.query(
+    "What are the key findings?",
+    model="gpt-4-turbo-preview"
+)</code></pre>
+                </div>
+            </section>
+
+            <!-- API Reference -->
+            <section id="api">
+                <h2>API Reference</h2>
+                <table class="api-table">
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Method</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>/documents/process</td>
+                        <td>POST</td>
+                        <td>Process and embed documents</td>
+                    </tr>
+                    <tr>
+                        <td>/documents/query</td>
+                        <td>POST</td>
+                        <td>Query processed documents</td>
+                    </tr>
+                    <tr>
+                        <td>/collections</td>
+                        <td>GET</td>
+                        <td>List document collections</td>
+                    </tr>
+                    <tr>
+                        <td>/collections/{id}</td>
+                        <td>GET</td>
+                        <td>Get collection details</td>
+                    </tr>
+                </table>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <h3>Example API Usage</h3>
+                        <button class="copy-button" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <pre><code class="language-python">import requests
+
+# Process document
+response = requests.post(
+    "https://api.ragify.com/documents/process",
+    files={"file": open("document.pdf", "rb")}
+)
+
+# Query documents
+response = requests.post(
+    "https://api.ragify.com/documents/query",
+    json={
+        "query": "What are the main conclusions?",
+        "collection_id": "col_123"
+    }
+)</code></pre>
+                </div>
+            </section><!-- Content sections remain the same -->
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script>
+        // Toggle mobile menu
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.docs-sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // Copy code functionality
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block').querySelector('code');
+            navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => button.innerHTML = originalText, 2000);
+            });
+        }
+
+        // Active section tracking
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.docs-nav-item').forEach(item => {
+                        item.classList.toggle('active', item.getAttribute('href') === `#${id}`);
+                    });
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+
+</html>
