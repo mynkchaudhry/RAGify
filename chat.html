@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAGify</title>
 
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23FF3366' d='M208 0c-29.9 0-54.7 20.5-61.8 48.2-.8 0-1.4-.2-2.2-.2-35.3 0-64 28.7-64 64 0 4.8.6 9.5 1.7 14C52.5 138 32 166.6 32 200c0 12.6 3.2 24.3 8.3 34.9C16.3 248.7 0 274.3 0 304c0 33.3 20.4 61.9 49.4 73.9-.9 4.6-1.4 9.3-1.4 14.1 0 39.8 32.2 72 72 72 4.1 0 8.1-.5 12-1.2 9.6 28.5 36.2 49.2 68 49.2 39.8 0 72-32.2 72-72V64c0-35.3-28.7-64-64-64zm368 304c0-29.7-16.3-55.3-40.3-69.1 5.1-10.6 8.3-22.3 8.3-34.9 0-33.4-20.5-62-49.7-74 1.1-4.5 1.7-9.2 1.7-14 0-35.3-28.7-64-64-64-.8 0-1.5.2-2.2.2C422.7 20.5 397.9 0 368 0c-35.3 0-64 28.6-64 64v376c0 39.8 32.2 72 72 72 31.8 0 58.4-20.7 68-49.2 3.9.7 7.9 1.2 12 1.2 39.8 0 72-32.2 72-72 0-4.8-.5-9.5-1.4-14.1 29-12 49.4-40.6 49.4-73.9z'/></svg>">
-
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23FF3366' d='M208 0c-29.9 0-54.7 20.5-61.8 48.2-.8 0-1.4-.2-2.2-.2-35.3 0-64 28.7-64 64 0 4.8.6 9.5 1.7 14C52.5 138 32 166.6 32 200c0 12.6 3.2 24.3 8.3 34.9C16.3 248.7 0 274.3 0 304c0 33.3 20.4 61.9 49.4 73.9-.9 4.6-1.4 9.3-1.4 14.1 0 39.8 32.2 72 72 72 4.1 0 8.1-.5 12-1.2 9.6 28.5 36.2 49.2 68 49.2 39.8 0 72-32.2 72-72V64c0-35.3-28.7-64-64-64zm368 304c0-29.7-16.3-55.3-40.3-69.1 5.1-10.6 8.3-22.3 8.3-34.9 0-33.4-20.5-62-49.7-74 1.1-4.5 1.7-9.2 1.7-14 0-35.3-28.7-64-64-64-.8 0-1.5.2-2.2.2C422.7 20.5 397.9 0 368 0c-35.3 0-64 28.6-64 64v376c0 39.8 32.2 72 72 72 31.8 0 58.4-20.7 68-49.2 3.9.7 7.9 1.2 12 1.2 39.8 0 72-32.2 72-72 0-4.8-.5-9.5-1.4-14.1 29-12 49.4-40.6 49.4-73.9z'/></svg>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <style>
         * {
             margin: 0;
@@ -24,11 +22,6 @@
             --gray: #666;
             --light: #fff;
             --success: #4CAF50;
-        }
-
-        .logo-link {
-            text-decoration: none;
-            margin-bottom: 1rem;
         }
 
         body {
@@ -49,6 +42,11 @@
             padding: 2rem 0;
             gap: 2rem;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-link {
+            text-decoration: none;
+            margin-bottom: 1rem;
         }
 
         .logo {
@@ -94,10 +92,13 @@
             position: absolute;
             inset: 0;
             display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .page.active {
             display: block;
+            opacity: 1;
         }
 
         .upload-container {
@@ -122,6 +123,7 @@
         .upload-box.drag-over {
             background: rgba(255, 255, 255, 0.05);
             border-color: var(--primary);
+            transform: scale(1.02);
         }
 
         .upload-icon {
@@ -200,6 +202,16 @@
             gap: 1rem;
             margin-bottom: 2rem;
             align-items: flex-start;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: messageAppear 0.3s ease forwards;
+        }
+
+        @keyframes messageAppear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .message-wrapper.user {
@@ -226,21 +238,64 @@
         }
 
         .message {
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 1rem;
-            max-width: 60%;
+            max-width: 80%;
             position: relative;
-            line-height: 1.5;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        .message h2 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .message ul {
+            margin: 1rem 0 1rem 1.5rem;
+            list-style-type: none;
+        }
+
+        .message li {
+            margin-bottom: 0.8rem;
+            position: relative;
+        }
+
+        .message li:before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+            position: absolute;
+            left: -1.1rem;
         }
 
         .message.user {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.08);
             border-top-right-radius: 0;
         }
 
         .message.bot {
-            background: rgba(72, 52, 212, 0.1);
+            background: rgba(72, 52, 212, 0.15);
             border-top-left-radius: 0;
+        }
+
+        .typing {
+            display: inline-block;
+            width: 1ch;
+            animation: cursor 0.8s infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes cursor {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .message.typing-animation {
+            min-height: 2.5rem;
         }
 
         .chat-input-container {
@@ -250,6 +305,7 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 1rem;
             align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .chat-input {
@@ -257,9 +313,10 @@
             background: transparent;
             border: none;
             color: var(--light);
-            font-size: 1rem;
+            font-size: 1.1rem;
             padding: 0.5rem;
             outline: none;
+            line-height: 1.5;
         }
 
         .chat-input::placeholder {
@@ -291,13 +348,8 @@
         }
 
         @keyframes rotation {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         ::-webkit-scrollbar {
@@ -322,7 +374,7 @@
 
 <body>
     <div class="sidebar">
-        <a href="index.html" class="logo-link">
+        <a href="#" class="logo-link">
             <i class="fas fa-brain logo"></i>
         </a>
         <button class="nav-button active" data-page="upload">
@@ -373,10 +425,14 @@
         // Navigation
         document.querySelectorAll('.nav-button').forEach(button => {
             button.addEventListener('click', () => {
-                document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.nav-button').forEach(b => {
+                    b.classList.remove('active');
+                });
                 button.classList.add('active');
 
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.page').forEach(p => {
+                    p.classList.remove('active');
+                });
                 document.getElementById(button.dataset.page).classList.add('active');
             });
         });
@@ -450,14 +506,82 @@
             }
         }
 
-        // Chat functionality
+        // Enhanced chat functionality with typing animation
         const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
         const messageLoader = document.getElementById('messageLoader');
 
-        window.addEventListener('load', () => {
-            addMessage("Hello! I'm your RAGify assistant. You can ask me questions about your uploaded documents.", 'bot');
-        });
+        async function typeText(element, text, speed = 30) {
+            const lines = text.split('\n');
+            let currentHTML = '';
+            let inList = false;
+            
+            for (let line of lines) {
+                if (line.startsWith('# ')) {
+                    // Close list if open
+                    if (inList) {
+                        currentHTML += '</ul>';
+                        inList = false;
+                    }
+                    // Handle heading
+                    currentHTML += `<h2>${line.substring(2)}</h2>`;
+                } else if (line.startsWith('* ')) {
+                    // Start list if not already in one
+                    if (!inList) {
+                        currentHTML += '<ul>';
+                        inList = true;
+                    }
+                    // Handle bullet points
+                    currentHTML += `<li>${line.substring(2)}</li>`;
+                } else if (line.trim() === '') {
+                    // Close list if open
+                    if (inList) {
+                        currentHTML += '</ul>';
+                        inList = false;
+                    }
+                    currentHTML += '<br>';
+                } else {
+                    // Close list if open
+                    if (inList) {
+                        currentHTML += '</ul>';
+                        inList = false;
+                    }
+                    currentHTML += `<p>${line}</p>`;
+                }
+                
+                element.innerHTML = currentHTML + '<span class="typing">|</span>';
+                await new Promise(resolve => setTimeout(resolve, speed));
+            }
+            
+            // Clean up any open lists
+            if (inList) {
+                currentHTML += '</ul>';
+            }
+            element.innerHTML = currentHTML;
+        }
+
+        async function addMessage(text, sender) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${sender}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${sender}`;
+            avatar.innerHTML = sender === 'bot' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender} typing-animation`;
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(messageDiv);
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            if (sender === 'bot') {
+                await typeText(messageDiv, text);
+            } else {
+                messageDiv.textContent = text;
+            }
+        }
 
         async function sendMessage() {
             const message = chatInput.value.trim();
@@ -481,33 +605,31 @@
                 });
 
                 const result = await response.json();
-                addMessage(result.response, 'bot');
+                await addMessage(formatBotResponse(result.response), 'bot');
             } catch (error) {
-                addMessage('Sorry, I encountered an error: ' + error.message, 'bot');
+                await addMessage('# Error\n* Sorry, I encountered an error: ' + error.message, 'bot');
             } finally {
                 messageLoader.style.display = 'none';
                 sendButton.style.display = 'flex';
             }
         }
 
-        function addMessage(text, sender) {
-            const wrapper = document.createElement('div');
-            wrapper.className = `message-wrapper ${sender}`;
-
-            const avatar = document.createElement('div');
-            avatar.className = `avatar ${sender}`;
-            avatar.innerHTML = sender === 'bot' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
-
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            messageDiv.textContent = text;
-
-            // Continuing from the previous code...
-
-            wrapper.appendChild(avatar);
-            wrapper.appendChild(messageDiv);
-            chatMessages.appendChild(wrapper);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+        function formatBotResponse(response) {
+            // Add heading to the response if it doesn't start with one
+            if (!response.startsWith('# ')) {
+                response = '# Response\n' + response;
+            }
+            
+            // Convert regular paragraphs into bullet points if they don't start with # or *
+            const lines = response.split('\n');
+            const formattedLines = lines.map(line => {
+                if (!line.startsWith('#') && !line.startsWith('*') && line.trim() !== '') {
+                    return '* ' + line;
+                }
+                return line;
+            });
+            
+            return formattedLines.join('\n');
         }
 
         chatInput.addEventListener('keypress', (e) => {
@@ -515,7 +637,10 @@
                 sendMessage();
             }
         });
+
+        window.addEventListener('load', () => {
+            addMessage("# Welcome to RAGify!\n* I'm your RAGify assistant\n* You can ask me questions about your uploaded documents\n* I'm still learning, so please be patient with me!", 'bot');
+        });
     </script>
 </body>
-
 </html>
