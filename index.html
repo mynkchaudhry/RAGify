@@ -169,18 +169,81 @@
             }
         }
 
+        /* Mobile Navigation */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
         /* Responsive Design */
+        @media (max-width: 1200px) {
+            .nav-container, .hero-content {
+                padding: 0 2rem;
+            }
+        }
+
         @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
             .nav-links {
-                display: none;
+                position: fixed;
+                top: 0;
+                right: -100%;
+                height: 100vh;
+                width: 70%;
+                background: rgba(0, 0, 0, 0.95);
+                backdrop-filter: blur(10px);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 2rem;
+                transition: right 0.3s ease;
+                z-index: 99;
+            }
+
+            .nav-links.active {
+                right: 0;
             }
 
             .hero h1 {
-                font-size: 3rem;
+                font-size: clamp(2rem, 8vw, 3rem);
+                padding: 0 1rem;
             }
 
             .hero p {
-                font-size: 1.125rem;
+                font-size: clamp(1rem, 4vw, 1.125rem);
+                padding: 0 1rem;
+            }
+
+            .cta-button {
+                padding: 0.875rem 1.75rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .logo {
+                font-size: 1.25rem;
+            }
+
+            .nav-links {
+                width: 85%;
+            }
+
+            .hero-content {
+                padding: 0 1rem;
             }
         }
     </style>
@@ -192,12 +255,37 @@
                 <i class="fas fa-brain"></i>
                 RAGify
             </a>
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="nav-links">
                 <a href="Documentation.html" class="nav-link">Documentation</a>
                 <a href="chat.html" class="cta-button">Get Started</a>
             </div>
         </div>
     </nav>
+
+    <script>
+        // Mobile menu functionality
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        const menuIcon = mobileMenuBtn.querySelector('i');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            menuIcon.classList.toggle('fa-bars');
+            menuIcon.classList.toggle('fa-times');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!navLinks.contains(e.target) && !mobileMenuBtn.contains(e.target) && navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+                menuIcon.classList.add('fa-bars');
+                menuIcon.classList.remove('fa-times');
+            }
+        });
+    </script>
 
     <div id="particles-js"></div>
 
@@ -211,10 +299,19 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
     <script>
+        // Function to update particle number based on screen size
+        function getParticleNumber() {
+            return window.innerWidth < 800 ? 600 : 100;
+        }
+
+        // Function to update particle speed based on screen size
+        function getParticleSpeed() {
+            return window.innerWidth < 768 ? 2 : 3;
+        }
         window.particlesJS("particles-js", {
             particles: {
                 number: {
-                    value: 300,
+                    value: getParticleNumber(),
                     density: {
                         enable: true,
                         value_area: 800
@@ -238,7 +335,7 @@
                     random: true,
                     anim: {
                         enable: true,
-                        speed: 6,
+                        speed: 2,
                         size_min: 0.3,
                         sync: false
                     }
@@ -252,7 +349,7 @@
                 },
                 move: {
                     enable: true,
-                    speed: 6,
+                    speed: getParticleSpeed(),
                     direction: "none",
                     random: true,
                     straight: false,
