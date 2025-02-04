@@ -1,29 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAGify</title>
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23FF3366' d='M208 0c-29.9 0-54.7 20.5-61.8 48.2-.8 0-1.4-.2-2.2-.2-35.3 0-64 28.7-64 64 0 4.8.6 9.5 1.7 14C52.5 138 32 166.6 32 200c0 12.6 3.2 24.3 8.3 34.9C16.3 248.7 0 274.3 0 304c0 33.3 20.4 61.9 49.4 73.9-.9 4.6-1.4 9.3-1.4 14.1 0 39.8 32.2 72 72 72 4.1 0 8.1-.5 12-1.2 9.6 28.5 36.2 49.2 68 49.2 39.8 0 72-32.2 72-72V64c0-35.3-28.7-64-64-64zm368 304c0-29.7-16.3-55.3-40.3-69.1 5.1-10.6 8.3-22.3 8.3-34.9 0-33.4-20.5-62-49.7-74 1.1-4.5 1.7-9.2 1.7-14 0-35.3-28.7-64-64-64-.8 0-1.5.2-2.2.2C422.7 20.5 397.9 0 368 0c-35.3 0-64 28.6-64 64v376c0 39.8 32.2 72 72 72 31.8 0 58.4-20.7 68-49.2 3.9.7 7.9 1.2 12 1.2 39.8 0 72-32.2 72-72 0-4.8-.5-9.5-1.4-14.1 29-12 49.4-40.6 49.4-73.9z'/></svg>">
+    <title>RAGify - AI Document Intelligence</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23FF3366' d='M208 0c-29.9 0-54.7 20.5-61.8 48.2-.8 0-1.4-.2-2.2-.2-35.3 0-64 28.7-64 64 0 4.8.6 9.5 1.7 14C52.5 138 32 166.6 32 200c0 12.6 3.2 24.3 8.3 34.9C16.3 248.7 0 274.3 0 304c0 33.3 20.4 61.9 49.4 73.9-.9 4.6-1.4 9.3-1.4 14.1 0 39.8 32.2 72 72 72 4.1 0 8.1-.5 12-1.2 9.6 28.5 36.2 49.2 68 49.2 39.8 0 72-32.2 72-72V64c0-35.3-28.7-64-64-64zm368 304c0-29.7-16.3-55.3-40.3-69.1 5.1-10.6 8.3-22.3 8.3-34.9 0-33.4-20.5-62-49.7-74 1.1-4.5 1.7-9.2 1.7-14 0-35.3-28.7-64-64-64-.8 0-1.5.2-2.2.2C422.7 20.5 397.9 0 368 0c-35.3 0-64 28.6-64 64v376c0 39.8 32.2 72 72 72 31.8 0 58.4-20.7 68-49.2 3.9.7 7.9 1.2 12 1.2 39.8 0 72-32.2 72-72 0-4.8-.5-9.5-1.4-14.1 29-12 49.4-40.6 49.4-73.9z'/></svg>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Reset and Base Styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: #0A0A0A;
-            color: white;
-            min-height: 100vh;
-            overflow-x: hidden;
+        :root {
+            --primary-color: #FF3366;
+            --secondary-color: #4834D4;
+            --bg-dark: #0A0A0A;
+            --text-light: #666;
+            --white: #FFFFFF;
         }
 
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: var(--bg-dark);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
 
+        /* Navigation Styles */
         nav {
             position: fixed;
             top: 0;
@@ -49,13 +57,13 @@
             align-items: center;
             gap: 0.5rem;
             text-decoration: none;
-            color: white;
+            color: var(--white);
             font-size: 1.5rem;
             font-weight: bold;
         }
 
         .logo i {
-            background: linear-gradient(45deg, #FF3366, #4834D4);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -67,15 +75,16 @@
         }
 
         .nav-link {
-            color: white;
+            color: var(--white);
             text-decoration: none;
             transition: color 0.3s;
         }
 
         .nav-link:hover {
-            color: #FF3366;
+            color: var(--primary-color);
         }
 
+        /* Hero Section Styles */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -89,6 +98,7 @@
         .hero-content {
             max-width: 1200px;
             z-index: 2;
+            position: relative;
         }
 
         .hero h1 {
@@ -96,7 +106,7 @@
             font-weight: 800;
             line-height: 1.1;
             margin-bottom: 1.5rem;
-            background: linear-gradient(45deg, #FF3366, #4834D4);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-size: 200% 200%;
@@ -105,7 +115,7 @@
 
         .hero p {
             font-size: 1.5rem;
-            color: #666;
+            color: var(--text-light);
             max-width: 800px;
             margin: 0 auto 2rem;
         }
@@ -113,8 +123,8 @@
         .cta-button {
             display: inline-block;
             padding: 1rem 2rem;
-            background: linear-gradient(45deg, #FF3366, #4834D4);
-            color: white;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
             text-decoration: none;
             border-radius: 9999px;
             font-weight: 600;
@@ -133,20 +143,20 @@
             height: 100%;
             top: 0;
             left: 0;
+            z-index: 1;
         }
 
+        /* Animations */
         @keyframes gradient {
-
-            0%,
-            100% {
+            0%, 100% {
                 background-position: 0% 50%;
             }
-
             50% {
                 background-position: 100% 50%;
             }
         }
 
+        /* Responsive Design */
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
@@ -162,7 +172,6 @@
         }
     </style>
 </head>
-
 <body>
     <nav>
         <div class="nav-container">
@@ -182,8 +191,7 @@
     <main class="hero">
         <div class="hero-content">
             <h1>Transform Your Documents with AI Intelligence</h1>
-            <p>Leverage state-of-the-art Retrieval-Augmented Generation (RAG) to create intelligent document
-                applications.</p>
+            <p>Leverage state-of-the-art Retrieval-Augmented Generation (RAG) to create intelligent document applications.</p>
             <a href="chat.html" class="cta-button">Start Free Trial</a>
         </div>
     </main>
@@ -193,7 +201,7 @@
         window.particlesJS("particles-js", {
             particles: {
                 number: {
-                    value: 80,
+                    value: 150,
                     density: {
                         enable: true,
                         value_area: 800
@@ -217,9 +225,9 @@
                 },
                 move: {
                     enable: true,
-                    speed: 2,
+                    speed: 6,
                     direction: "none",
-                    random: false,
+                    random: true,
                     straight: false,
                     out_mode: "out",
                     bounce: false
@@ -236,12 +244,26 @@
                         enable: true,
                         mode: "push"
                     },
-                    resize: true
+                    onmove: {
+                        enable: true,
+                        mode: "attract"
+                    }
+                },
+                modes: {
+                    repulse: {
+                        distance: 100,
+                        duration: 0.4
+                    },
+                    push: {
+                        particles_nb: 4
+                    },
+                    attract: {
+                        speed: 6
+                    }
                 }
             },
             retina_detect: true
         });
     </script>
 </body>
-
 </html>
